@@ -1,0 +1,27 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[dev-packages]
+
+
+
+[packages]
+
+networkx = "*"
+pyyaml = "*"
+numpy = "*"
+scipy = "*"
+matplotlib = "*"
+bezier = "*"
+gibberish = "*"
+tqdm = "*"
+"neo4j-driver" = "*"
+
+
+[requires]
+
+python_version = "3.6"
