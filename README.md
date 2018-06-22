@@ -2,7 +2,7 @@
 
 A graph question answering (GQA) dataset inspired by [CLEVR](https://cs.stanford.edu/people/jcjohns/clevr/). You could call it CLEGR. We aim to follow a similar methodology and usefulness.
 
-<img src="https://raw.githubusercontent.com/Octavian-ai/clevr-graph/master/assets/example2_qa.png"/>
+<img src="https://raw.githubusercontent.com/davidsketchdeck/clevr-graph/master/assets/example2_qa.png"/>
 
 The graph data is modelled on transit networks (e.g. the London tube and train network). Questions are modelled on questions typically asked around mass transit (e.g. How many stops between? Where do I change?). Our aim is that a successful solution to this dataset has real world applications.
 
