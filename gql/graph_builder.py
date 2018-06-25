@@ -27,7 +27,7 @@ def cypherencode(v: NeoTypes):
 
 def ALL_PROPERTIES(entity: Dict[str, Any]) -> Dict[str, NeoTypes]:
 
-    return {k: cypherparse(v) for k, v in entity.state.items()}
+    return {k: cypherparse(v) for k, v in entity.items()}
 
 
 def CONST_LABEL(label: str) -> Callable[[Dict[str, Any]], List[str]]:
@@ -67,10 +67,10 @@ class GraphBuilder(object):
         self._edge_label_fn = edge_label_fn
         self._node_label_fn = node_label_fn
         self.gqa = gqa
-        self.graph = gqa.graph
+        self.graph = gqa['graph']
 
     def generate_node_inserts(self):
-        for node in self.graph.nodes.values():
+        for node in self.graph['nodes']:
             labels = self._node_label_fn(node)
             props = self._node_prop_fn(node)
 
@@ -79,8 +79,15 @@ class GraphBuilder(object):
             template = f"CREATE (n:{':'.join(labels)} {{ {props} }})"
             yield template
 
+        for line in self.graph['lines']:
+            props = self._node_prop_fn(line)
+            props = ', '.join(
+                f'{k}: {quote(v) if isinstance(v, str) else v}' for k, v in props.items())
+            template = f"CREATE (n:LINE {{ {props} }})"
+            yield template
+
     def generate_edge_inserts(self):
-        for edge in self.graph.edges:
+        for edge in self.graph['edges']:
             labels = self._edge_label_fn(edge)
             assert len(labels) > 0, "edges must have at least one label"
             props = self._edge_prop_fn(edge)

@@ -52,7 +52,7 @@ class QuestionForm(object):
 		try:
 			cypher = GqlBuilder(functional).build()
 		except Exception as ex:
-			logger.warning(f"Failed to generate cypher: {ex}")
+			logger.warning(f"Failed to generate cypher: {ex}", ex)
 			# traceback.print_exc()
 			cypher = None
 
@@ -106,13 +106,19 @@ question_forms = [
 	QuestionForm(
 		[Line], 
 		"How many architecture styles does {} pass through?", 
-		(lambda a: Count(Unique(Pluck(Nodes(Filter(AllEdges(), "line_id", Pick(a, "id"))), "architecture"))) ),
+		(lambda a: Count(Unique(Pluck(Nodes(Filter(AllEdges(), "line_id", Pick(a, "id"))),
+								  "architecture"))) ),
 		"LineTotalArchitectureCount"),
 
 	QuestionForm(
 		[Architecture, Line], 
 		"How many {} stations are on the {} line?", 
-		(lambda a, l: CountIfEqual((Pluck(Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))), "architecture")), a) ),
+		(lambda a, l: Count(
+			Unique(Filter(
+				Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+				"architecture",
+				a))
+		)),
 		"LineArchitectureCount"),
 
 	QuestionForm(
@@ -141,16 +147,19 @@ question_forms = [
 		), "name"),
 		"NearestStationDisabledAccess"),
 
-	QuestionForm(
-		[Architecture, Cleanliness, Music],
-		"Which {} station is beside the {} station with {} music?",
-		lambda a, c, m: Pluck(First(UnpackUnitList(
-				FilterAdjacent(
-					Filter(AllNodes(), "architecture", a), 
-					Filter(Filter(AllNodes(), "cleanliness", c), "music", m)))
-			), "name"),
-		"NearestByProperties"
-		),
+	# Too often fails because it is ambiguous (multiple answers)
+	# QuestionForm(
+	# 	[Architecture, Cleanliness, Music],
+	# 	"Which {} station is beside the {} station with {} music?",
+	# 	lambda a, c, m: Pluck(First(UnpackUnitList(
+	# 			FilterAdjacent(
+	# 				Filter(AllNodes(), "architecture", a),
+	# 				Filter(Filter(AllNodes(), "cleanliness", c), "music", m)
+	# 			)
+	# 		)
+	# 		), "name"),
+	# 	"NearestByProperties"
+	# 	),
 
 
 

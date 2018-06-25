@@ -4,6 +4,8 @@ import os
 import yaml
 import random
 import uuid
+import sys
+import traceback
 import argparse
 from tqdm import tqdm
 from collections import Counter
@@ -72,7 +74,10 @@ if __name__ == "__main__":
 								yield DocumentSpec(g,q,a).stripped()
 							
 						except Exception as ex:
-							logger.debug(f"Exception {ex} whilst trying to generate {form}")
+							print(traceback.format_exception(None, # <- type(e) by docs, but ignored
+															 ex, ex.__traceback__),
+								  file=sys.stderr, flush=True)
+							logger.debug(f"Exception {ex} whilst trying to generate {form}", ex)
 							# Continue to next attempt
 						
 
