@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, AnyStr
 from .graph_builder import cypherencode, cypherparse, quote
-from gqa.types import NodeSpec
+from gqa.types import NodeSpec, EdgeSpec, LineSpec
 import copy
 
 class Var(object):
@@ -64,12 +64,36 @@ class GqlBuilder(object):
             "Pluck": self.pluck,
             "Pick": self.pick,
             "Edges": self.edges,
+            "Nodes": self.nodes,
+            "AllEdges": self.allEdges,
+            "Filter": self.filter,
         }
         self.current_var = 0
         self.current_tmp = 0
         self.current_where = []
         self.current_state = MATCH
         self.specials = []
+
+    def allEdges(self):
+        if self.current_state > MATCH:
+            raise NotImplementedError()
+
+        var = self.get_var()
+        subquery = f"MATCH ()-[{var}]-()) "
+        self._stack.append(subquery)
+        return var
+
+    def nodes(self, a: Var):
+        vars = self.get_simple_with()
+        tmp = self.get_tmp()
+        if self.current_state == MATCH:
+            self._do_where_clause()
+        if self.current_state == WITH:
+            self.do_with_to_match_transition()
+        self._stack.append(f"MATCH ({tmp})-[{a}]-()")
+        var2 = self.get_var()
+        self._stack.append(f"WITH {vars}, collect({tmp}) AS {var2}")
+        return var2
 
     def edges(self, a: Var):
         vars = self.get_simple_with()
@@ -94,21 +118,33 @@ class GqlBuilder(object):
     def get_simple_with(self):
         return ', '.join("var"+str(i) for i in range(1,self.current_var+1))
 
-    def input_argument(self, input_arg):
+    def node_input_argument(self, input_arg):
         if self.current_state > MATCH:
             raise NotImplementedError()
 
         var = self.get_var()
         suquery = f"MATCH ({var})"
-        where = f"{var}.name={quote(input_arg['name'])}" \
-
+        where = f"{var}.name={quote(input_arg['name'])}"
         self.current_where.append(where)
         self._stack.append(suquery)
         return var
 
+    def edge_input_argument(self, input_arg):
+        raise NotImplementedError()
+
+    def line_input_argument(self, input_arg):
+        if self.current_state > MATCH:
+            raise NotImplementedError()
+
+        tmp = self.get_tmp()
+        suquery = f"CALL apoc.create.vNodes(['LINE'], [{{id:'{input_arg}'}}]) yield node as {tmp}"
+        self._stack.append(suquery)
+        return self.do_match_to_with_transition(f"{tmp}")
+
+
     def subtract(self, a: Var, b: Var):
         subquery = f"{a} - {b}"
-        return self.do_where_to_with_transition(subquery) if self.current_state < WITH else subquery
+        return self.do_match_to_with_transition(subquery) if self.current_state < WITH else subquery
 
     def unique(self, a: Var):
         var = self.get_var()
@@ -120,11 +156,11 @@ class GqlBuilder(object):
 
     def count(self, a: Var):
         subquery = f"length({a}) "
-        return self.do_where_to_with_transition(subquery) if self.current_state < WITH else subquery
+        return self.do_match_to_with_transition(subquery) if self.current_state < WITH else subquery
 
     def pick(self, a: Var, prop: str):
         subquery = f"{a}.{unquote(prop)}"
-        return self.do_where_to_with_transition(subquery) if self.current_state < WITH else subquery
+        return self.do_match_to_with_transition(subquery) if self.current_state < WITH else subquery
 
     def shortest_path(self, a: Var, b: Var):
         if self.current_state > MATCH:
@@ -134,7 +170,7 @@ class GqlBuilder(object):
         suquery = f"MATCH {tmp} = shortestPath(({a})-[*]-({b})) "
         self._stack.append(suquery)
 
-        var = self.do_where_to_with_transition(f"nodes({tmp}) ")
+        var = self.do_match_to_with_transition(f"nodes({tmp}) ")
         return var
 
     def station(self, a: Var):
@@ -151,6 +187,14 @@ class GqlBuilder(object):
 
     def boolean(self, a: Var):
         return a
+
+    def filter(self, query_var: Var, property: str, target: Var):
+        if self.current_state > MATCH:
+            raise NotImplementedError()
+
+        where = f"{query_var}.{property} == {target}"
+        self.current_where.append(where)
+        return query_var
 
     def pluck(self, query_var: Var, property: str):
         vars = self.get_simple_with()
@@ -177,7 +221,7 @@ class GqlBuilder(object):
             self._stack.append(f"WHERE {' AND '.join(self.current_where)} ")
             self.current_where = []
 
-    def do_where_to_with_transition(self, subquery):
+    def do_match_to_with_transition(self, subquery):
         self._do_where_clause()
 
         var = self.get_var()
