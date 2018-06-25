@@ -154,7 +154,7 @@ class Nodes(FunctionalOperator):
 		for i in edges:
 			n.append(graph.nodes[i["station1"]])
 			n.append(graph.nodes[i["station2"]])
-		return n
+		return list(set(n))
 
 
 def ids_to_nodes(graph, ids):
