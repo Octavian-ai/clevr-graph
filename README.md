@@ -129,9 +129,10 @@ The `gql` directory contains code to:
 
 ### Usage
 
-Start a neo4j instance with expected ports and credentials
+Start a neo4j enterprise instance with expected ports and credentials
+N.b. By running this you are accepting the Neo4j Enterprise License Agreement 
 ```
-docker run -it -p 7474:7474 -p 7687:7687 --env NEO4J_AUTH=neo4j/clegr-secrets neo4j:3.4
+docker run -it -p 7474:7474 -p 7687:7687 --env NEO4J_ACCEPT_LICENSE_AGREEMENT=yes --env NEO4J_AUTH=neo4j/clegr-secrets andrewjefferson/myneo4j:3.4.1-enterprise-plus-apoc
 ```
 
 To load the first graph from `qga.yaml` into your Neo4j database (n.b. this will pre-emptively wipe your neo4j database, use with care):
