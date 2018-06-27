@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 if __name__ == "__main__":
 
 	logging.basicConfig()
-	logger.setLevel('DEBUG')
+	logger.setLevel('INFO')
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--count', type=int, default=10000, help="Number of (G,Q,A) to generate")
@@ -53,11 +53,15 @@ if __name__ == "__main__":
 			with tqdm(total=FLAGS.count) as pbar:
 				while i < FLAGS.count:
 
-					logger.debug("Generating graph")
-					g = GraphGenerator(small=FLAGS.quick).generate().graph_spec
+					try:
+						logger.debug("Generating graph")
+						g = GraphGenerator(small=FLAGS.quick).generate().graph_spec
 
-					for j in range(FLAGS.questions_per_graph):
-						try:
+						if len(g.nodes) == 0 or len(g.edges) == 0:
+							raise ValueError("Empty graph was generated")
+
+						for j in range(FLAGS.questions_per_graph):
+						
 							form = next(form_gen)
 							f_try[form.tpe] += 1
 							
@@ -73,12 +77,12 @@ if __name__ == "__main__":
 							else:
 								yield DocumentSpec(g,q,a).stripped()
 							
-						except Exception as ex:
-							print(traceback.format_exception(None, # <- type(e) by docs, but ignored
-															 ex, ex.__traceback__),
-								  file=sys.stderr, flush=True)
-							logger.debug(f"Exception {ex} whilst trying to generate {form}", ex)
-							# Continue to next attempt
+					except Exception as ex:
+						# print(traceback.format_exception(None, # <- type(e) by docs, but ignored
+						# 	ex, ex.__traceback__),
+						# 	file=sys.stderr, flush=True)
+						logger.debug(f"Exception {ex} whilst trying to generate GQA", ex)
+						# Continue to next attempt
 						
 
 		yaml.dump_all(specs(), file, explicit_start=True)
@@ -86,9 +90,9 @@ if __name__ == "__main__":
 		for i in f_try:
 			if i in f_success: 
 				if f_success[i] < f_try[i]:
-					logger.debug(f"Question form {i} failed to generate {f_try[i] - f_success[i]}/{f_try[i]}")
+					logger.warn(f"Question form {i} failed to generate {f_try[i] - f_success[i]}/{f_try[i]}")
 			else:
-				logger.debug(f"Question form {i} totally failed to generate")
+				logger.warn(f"Question form {i} totally failed to generate")
 
 				
 

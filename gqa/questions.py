@@ -52,7 +52,7 @@ class QuestionForm(object):
 		try:
 			cypher = GqlBuilder(functional).build()
 		except Exception as ex:
-			logger.warning(f"Failed to generate cypher: {ex}", ex)
+			logger.debug(f"Failed to generate cypher: {ex}")
 			# traceback.print_exc()
 			cypher = None
 

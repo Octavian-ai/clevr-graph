@@ -20,6 +20,7 @@ bezier = "*"
 gibberish = "*"
 tqdm = "*"
 "neo4j-driver" = "*"
+sklearn = "*"
 
 
 [requires]

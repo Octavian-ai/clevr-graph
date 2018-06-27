@@ -276,8 +276,7 @@ class GqlBuilder(object):
         operation, args = fp.popitem()
 
         if operation not in self.ops:
-            print(f"{operation} not yet implemented")
-            raise NotImplementedError()
+            raise NotImplementedError(operation)
 
         fn_to_call = self.ops[operation]
 

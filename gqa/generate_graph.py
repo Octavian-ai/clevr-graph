@@ -3,6 +3,7 @@ import uuid
 import random
 import numpy as np
 import scipy
+from sklearn.neighbors import KDTree
 import networkx as nx
 import bezier
 import gibberish
@@ -162,32 +163,26 @@ class GraphGenerator(object):
 			self.line_stations[line] = stations
 		
 		# Helpers for coalesce operation
-
 		def find_nearby_stations():
-			# If you want to make this faster first sort all the stations into quadrants
-			pairs = []
 
-			# all_stations = set()
-			# for line, stations in self.line_stations.items():
-			# 	for id_i, i in enumerate(stations):
-			# 		all_stations.add(i)
+			if len(self.station_set) == 0:
+				return frozenset()
 
-			# pts = [i.pt for i in all_stations]
-			# tree = scipy.spatial.KDTree(pts, self.stats["min_station_dist"]*4)
-			# return tree.query_pairs(self.stats["min_station_dist"])
+			samples = []
+			features = []
 
-			for line, stations in self.line_stations.items():
-				for id_i, i in enumerate(stations):
-					for other_line, other_stations in self.line_stations.items():
-						for id_j, j in enumerate(other_stations):
-							if i != j and i.dist(j) < self.stats["min_station_dist"]:
-								if (j, i) not in pairs:
-									pairs.append((i, j))
+			for i in self.station_set:
+				features.append(i)
+				samples.append(i.pt)
 
-			if len(pairs) > 0:
-				return pairs
+			X = np.array(samples)
+			tree = KDTree(X, 10)
+			ind = tree.query_radius(X, self.stats["min_station_dist"])
 
-			raise StopIteration()
+			return frozenset([
+				frozenset([ features[i] for i in group ]) for group in ind if len(group) > 1
+			])
+
 
 		def repif(cur, tar, rep):
 			if cur == tar:
@@ -199,23 +194,27 @@ class GraphGenerator(object):
 			return list(OrderedDict.fromkeys(l))
 
 		def replace_station(target, replacement):
-			# logger.info("Replace station {} with {}".format(b, a))
 			self.line_stations = {
 				line: remove_dupes([repif(i, target, replacement) for i in stations])
 				for line, stations in self.line_stations.items()
 			}
+			self.station_set -= set([target])
 
 		# Coalesce nearby stations on lines
 		# Coalesce stations between lines
-		try:
-			logger.debug("Coalesce stations")
-			for i in range(30):
-				pairs = find_nearby_stations()
-				for a, b in pairs:
+		logger.debug("Coalesce stations")
+		for i in range(30):
+			groups = find_nearby_stations()
+
+			if len(groups) == 0:
+				break
+
+			logger.debug(f"Found {len(groups)} groups of nearby stations")
+			for a, *rest in groups:
+				for b in rest:
 					replace_station(b, a)
 
-		except StopIteration:
-			pass
+			
 
 
 	def gen_graph_spec(self):
