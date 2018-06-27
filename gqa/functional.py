@@ -201,7 +201,22 @@ class CountIfEqual(FunctionalOperator):
 
 class Mode(FunctionalOperator):
 	def op(self, graph, l):
-		return Counter(l).most_common(1)[0][0]
+
+		if len(l) == 0:
+			raise ValueError("Cannot find mode of empty sequence")
+
+		c = Counter(l)
+		most = c.most_common(2)
+
+		# Only one unique value in l
+		if len(most) == 1:
+			return most[0][0]
+
+		# If the most common occurs more than any other
+		if most[0][1] > most[1][1]:
+			return most[0][0]
+
+		raise ValueError("No unique mode")
 
 class Unique(FunctionalOperator):
 	def op(self, graph, l):

@@ -19,18 +19,17 @@ logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
 
-	logging.basicConfig()
-	logger.setLevel('INFO')
-
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--count', type=int, default=10000, help="Number of (G,Q,A) to generate")
+	parser.add_argument('--log-level', type=str, default='INFO')
 	parser.add_argument('--questions-per-graph', type=int, default=1, help="Number of (Q,A) per G")
 	parser.add_argument('--quick', action='store_true', help="Generate small graphs (faster)")
 	parser.add_argument('--omit-graph', action='store_true', help="Don't export the graph")
-
-
-
 	FLAGS = parser.parse_args()
+
+	logging.basicConfig()
+	logger.setLevel(FLAGS.log_level)
+	logging.getLogger('gqa').setLevel(FLAGS.log_level)
 
 	filename = f"./data/gqa-{uuid.uuid4()}.yaml"
 	logger.info(f"Generating {FLAGS.count} (G,Q,A) tuples into {filename}")
@@ -81,7 +80,7 @@ if __name__ == "__main__":
 						# print(traceback.format_exception(None, # <- type(e) by docs, but ignored
 						# 	ex, ex.__traceback__),
 						# 	file=sys.stderr, flush=True)
-						logger.debug(f"Exception {ex} whilst trying to generate GQA", ex)
+						logger.debug(f"Exception {ex} whilst trying to generate GQA")
 						# Continue to next attempt
 						
 
