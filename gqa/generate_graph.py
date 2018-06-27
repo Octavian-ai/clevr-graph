@@ -15,17 +15,23 @@ logger = logging.getLogger(__name__)
 
 from .types import GraphSpec, NodeSpec, EdgeSpec, LineSpec
 
-EntityProperties = {
+LineProperties = {
+	"has_aircon": [True, False],
 	"color": ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan'],
 	"stroke": ["solid" , "dashed", "dashdot", "dotted"],
 	"built": ["50s", "60s", "70s", "80s", "90s", "00s", "recent"],
-	"has_aircon": [True, False],
+}
+
+StationProperties = {
 	"disabled_access": [True, False],
 	"has_rail": [True, False],
 	"music": ["classical", "rock n roll", "rnb", "electronic", "country", "none", "swing", "pop"],
 	"architecture": ["victorian", "modernist", "concrete", "glass", "art-deco", "new"],
-	"size": ["tiny", "small", "medium", "large", "massive"],
+	"size": ["tiny", "small", "medium-sized", "large", "massive"],
 	"cleanliness": ["clean", 'dirty', 'shabby', 'derilict', 'rat-infested'],
+}
+
+OtherProperties = {
 	"surname": [" street", " st", " road", " court", " grove", "bridge", " bridge", " lane", " way", " boulevard", " crossing", " square", "ham", ' on trent', ' upon Thames', ' international', ' hospital', 'neyland', 'ington', 'ton', 'wich', ' manor', ' estate', ' palace']
 }
 
@@ -90,21 +96,21 @@ class GraphGenerator(object):
 			self.stats["stations_per_line"] = 3
 
 
-	def gen_a(self, Clz, *props):
+	def gen_a(self, Clz, prop_dict):
 		return Clz({
-			i : random.choice(EntityProperties[i])
-			for i in props
+			k : random.choice(prop_dict[k])
+			for k in prop_dict.keys()
 		})
 
 	def gen_line(self):
-		l = self.gen_a(GeneratedLine, "color", "stroke", "built", "has_aircon")
+		l = self.gen_a(GeneratedLine, LineProperties)
 		name = l.p["color"] + " " + gibberish.generate_word()
 		l.p["name"] = name.title()
 		return l
 
 	def gen_station(self):
-		s = self.gen_a(GeneratedStation, "disabled_access", "has_rail", "music", "architecture", "size", "cleanliness")
-		name = gibberish.generate_word() + random.choice(EntityProperties["surname"])
+		s = self.gen_a(GeneratedStation, StationProperties)
+		name = gibberish.generate_word() + random.choice(OtherProperties["surname"])
 		s.p["name"] = name.title()
 		return s
 

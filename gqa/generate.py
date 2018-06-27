@@ -71,6 +71,8 @@ if __name__ == "__main__":
 							i += 1
 							pbar.update(1)
 
+							logger.debug(f"Question: '{q}', answer: '{a}'")
+
 							if FLAGS.omit_graph:
 								yield DocumentSpec(None,q,a).stripped()
 							else:

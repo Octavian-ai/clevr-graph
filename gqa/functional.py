@@ -5,7 +5,7 @@ from collections import Counter
 from inspect import signature
 
 from .types import NodeSpec, EdgeSpec
-from .generate_graph import EntityProperties
+from .generate_graph import StationProperties, LineProperties
 
 from typing import List, Dict
 
@@ -75,6 +75,17 @@ class Station(FunctionalOperator):
 	def get(self, graph):
 		return Station(random.choice(list(graph.nodes.values())))
 
+class StationPropertyName(FunctionalOperator):
+	@classmethod
+	def get(self, graph):
+		return StationPropertyName(random.choice(StationProperties.keys()))
+
+class StationProperty(FunctionalOperator):
+	@classmethod
+	def get(self, graph):
+		key = random.choice(list(StationProperties.keys()))
+		return StationProperty(key, StationProperties[key])
+
 class Line(FunctionalOperator):
 	@classmethod
 	def get(self, graph):
@@ -83,17 +94,22 @@ class Line(FunctionalOperator):
 class Architecture(FunctionalOperator):
 	@classmethod
 	def get(self, graph):
-		return Architecture(random.choice(EntityProperties["architecture"]))
+		return Architecture(random.choice(StationProperties["architecture"]))
+
+class Size(FunctionalOperator):
+	@classmethod
+	def get(self, graph):
+		return Size(random.choice(StationProperties["size"]))
 
 class Music(FunctionalOperator):
 	@classmethod
 	def get(self, graph):
-		return Music(random.choice(EntityProperties["music"]))
+		return Music(random.choice(StationProperties["music"]))
 
 class Cleanliness(FunctionalOperator):
 	@classmethod
 	def get(self, graph):
-		return Cleanliness(random.choice(EntityProperties["cleanliness"]))
+		return Cleanliness(random.choice(StationProperties["cleanliness"]))
 
 class Boolean(FunctionalOperator):
 	@classmethod

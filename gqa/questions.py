@@ -64,6 +64,149 @@ class QuestionForm(object):
 
 question_forms = [
 
+	# --------------------------------------------------------------------------
+	# Station properties
+	# --------------------------------------------------------------------------
+
+	QuestionForm(
+		[Station], 
+		"How clean is {}?", 
+		(lambda s: Pick(s, "cleanliness")),
+		"StationCleanliness"),
+
+	QuestionForm(
+		[Station], 
+		"How big is {}?", 
+		(lambda s: Pick(s, "size")),
+		"StationSize"),
+
+	QuestionForm(
+		[Station], 
+		"What music plays at {}?", 
+		(lambda s: Pick(s, "music")),
+		"StationMusic"),
+
+	QuestionForm(
+		[Station], 
+		"What architectural style is {}?", 
+		(lambda s: Pick(s, "architecture")),
+		"StationArchitecture"),
+
+	QuestionForm(
+		[Station], 
+		"Does {} have disabled access?", 
+		(lambda s: Pick(s, "disabled_access")),
+		"StationDisabledAccess"),
+
+	QuestionForm(
+		[Station], 
+		"Does {} have rail connections?", 
+		(lambda s: Pick(s, "has_rail")),
+		"StationHasRail"),
+
+	# --------------------------------------------------------------------------
+	
+	QuestionForm(
+		[Line], 
+		"How many architectural styles does {} pass through?", 
+		(lambda l: Count(Unique(Pluck(Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+								  "architecture"))) ),
+		"LineTotalArchitectureCount"),
+
+	QuestionForm(
+		[Line], 
+		"How many music styles does {} pass through?", 
+		(lambda l: Count(Unique(Pluck(Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+								  "music"))) ),
+		"LineTotalMusicCount"),
+
+	QuestionForm(
+		[Line], 
+		"How many sizes of station does {} pass through?", 
+		(lambda l: Count(Unique(Pluck(Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+								  "size"))) ),
+		"LineTotalSizeCount"),
+
+	# --------------------------------------------------------------------------
+
+	QuestionForm(
+		[Music, Line], 
+		"How many stations playing {} does {} pass through?", 
+		lambda v, l: CountIfEqual(
+			Pluck(
+				Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+				"music"
+			),
+			v
+		),
+		"LineFilterMusicCount"),
+
+	QuestionForm(
+		[Cleanliness, Line], 
+		"How many {} stations does {} pass through?", 
+		lambda v, l: CountIfEqual(
+			Pluck(
+				Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+				"cleanliness"
+			),
+			v
+		),
+		"LineFilterCleanlinessCount"),
+
+	QuestionForm(
+		[Size, Line], 
+		"How many {} stations does {} pass through?", 
+		lambda v, l: CountIfEqual(
+			Pluck(
+				Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+				"size"
+			),
+			v
+		),
+		"LineFilterSizeCount"),
+
+	QuestionForm(
+		[Line], 
+		"How many stations with disabled access does {} pass through?", 
+		lambda l: CountIfEqual(
+			Pluck(
+				Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+				"disabled_access"
+			),
+			True
+		),
+		"LineFilterDisabledAccessCount"),
+
+	QuestionForm(
+		[Line], 
+		"How many stations with rail connections does {} pass through?", 
+		lambda l: CountIfEqual(
+			Pluck(
+				Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+				"has_rail"
+			),
+			True
+		),
+		"LineFilterHasRailCount"),
+
+	# --------------------------------------------------------------------------
+
+	# Other way of expressing the How many program
+	# QuestionForm(
+	# 	[Architecture, Line], 
+	# 	"How many {} stations are on the {} line?", 
+	# 	(lambda a, l: Count(
+	# 		Unique(Filter(
+	# 			Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+	# 			"architecture",
+	# 			a))
+	# 	)),
+	# 	"LineArchitectureCount"),
+
+
+	
+	# --------------------------------------------------------------------------
+
 	QuestionForm(
 		[Station, Station], 
 		"How many stations are between {} and {}?", 
@@ -85,12 +228,6 @@ question_forms = [
 		"StationLineCount"),
 
 	QuestionForm(
-		[Station], 
-		"How clean is {}?", 
-		(lambda a: Pick(a, "cleanliness")),
-		"StationCleanliness"),
-
-	QuestionForm(
 		[Station, Station], 
 		"Are {} and {} on the same line?", 
 		(lambda a, b: HasIntersection(GetLines(a), GetLines(b)) ),
@@ -102,24 +239,6 @@ question_forms = [
 		"Which stations does {} pass through?", 
 		(lambda a: Pluck(Unique(Nodes(Filter(AllEdges(), "line_id", Pick(a, "id")))), "name")),
 		"LineStations"),
-
-	QuestionForm(
-		[Line], 
-		"How many architecture styles does {} pass through?", 
-		(lambda a: Count(Unique(Pluck(Nodes(Filter(AllEdges(), "line_id", Pick(a, "id"))),
-								  "architecture"))) ),
-		"LineTotalArchitectureCount"),
-
-	QuestionForm(
-		[Architecture, Line], 
-		"How many {} stations are on the {} line?", 
-		(lambda a, l: Count(
-			Unique(Filter(
-				Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
-				"architecture",
-				a))
-		)),
-		"LineArchitectureCount"),
 
 	QuestionForm(
 		[Architecture],
