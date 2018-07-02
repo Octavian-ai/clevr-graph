@@ -21,17 +21,27 @@ This dataset contains a set of graph, question, answer tuples where
 
 `python -m gqa.list_questions` lists the currently supported questions:
 
+ - How clean is {Station}?
+ - How big is {Station}?
+ - What music plays at {Station}?
+ - What architectural style is {Station}?
+ - Does {Station} have disabled access?
+ - Does {Station} have rail connections?
+ - How many architectural styles does {Line} pass through?
+ - How many music styles does {Line} pass through?
+ - How many sizes of station does {Line} pass through?
+ - How many stations playing {Music} does {Line} pass through?
+ - How many {Cleanliness} stations does {Line} pass through?
+ - How many {Size} stations does {Line} pass through?
+ - How many stations with disabled access does {Line} pass through?
+ - How many stations with rail connections does {Line} pass through?
  - How many stations are between {Station} and {Station}?
  - Which lines is {Station} on?
  - How many lines is {Station} on?
- - How clean is {Station}?
  - Are {Station} and {Station} on the same line?
  - Which stations does {Line} pass through?
- - How many architecture styles does {Line} pass through?
- - How many {Architecture} stations are on the {Line} line?
  - Which line has the most {Architecture} stations?
  - What's the nearest station to {Station} with disabled access?
- - Which {Architecture} station is beside the {Cleanliness} station with {Music} music?
 
 Pull requests adding new questions are very welcome!
 
@@ -104,7 +114,7 @@ question:
   <tr><td>Average number of lines per graph</td><td>20</td></tr>
   <tr><td>Average number of stations per graph</td><td>440</td></tr>
   <tr><td>Average number of edges per graph</td><td>420</td></tr>
-  <tr><td>Number of question types</td><td>11</td></tr>
+  <tr><td>Number of question types</td><td>21</td></tr>
 </table>
 
 ## Generation
