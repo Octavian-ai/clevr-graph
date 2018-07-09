@@ -25,6 +25,10 @@ if __name__ == "__main__":
 	parser.add_argument('--questions-per-graph', type=int, default=1, help="Number of (Q,A) per G")
 	parser.add_argument('--quick', action='store_true', help="Generate small graphs (faster)")
 	parser.add_argument('--omit-graph', action='store_true', help="Don't export the graph")
+	parser.add_argument('--int-names', action='store_true', help="Use integers as names")
+	parser.add_argument('--only-type', type=str, default=None, help="Only generate questions of type")
+
+
 	FLAGS = parser.parse_args()
 
 	logging.basicConfig()
@@ -54,29 +58,35 @@ if __name__ == "__main__":
 
 					try:
 						logger.debug("Generating graph")
-						g = GraphGenerator(small=FLAGS.quick).generate().graph_spec
+						g = GraphGenerator(small=FLAGS.quick,int_names=FLAGS.int_names).generate().graph_spec
 
 						if len(g.nodes) == 0 or len(g.edges) == 0:
 							raise ValueError("Empty graph was generated")
 
-						for j in range(FLAGS.questions_per_graph):
+
+						j = 0
+						while j < FLAGS.questions_per_graph:
 						
 							form = next(form_gen)
-							f_try[form.tpe] += 1
-							
-							logger.debug(f"Generating question '{form.english}'")
-							q, a = form.generate(g)
 
-							f_success[form.tpe] += 1
-							i += 1
-							pbar.update(1)
+							if FLAGS.only_type is None or FLAGS.only_type == form.tpe:
 
-							logger.debug(f"Question: '{q}', answer: '{a}'")
+								f_try[form.tpe] += 1
+								
+								logger.debug(f"Generating question '{form.english}'")
+								q, a = form.generate(g)
 
-							if FLAGS.omit_graph:
-								yield DocumentSpec(None,q,a).stripped()
-							else:
-								yield DocumentSpec(g,q,a).stripped()
+								f_success[form.tpe] += 1
+								i += 1
+								j += 1
+								pbar.update(1)
+
+								logger.debug(f"Question: '{q}', answer: '{a}'")
+
+								if FLAGS.omit_graph:
+									yield DocumentSpec(None,q,a).stripped()
+								else:
+									yield DocumentSpec(g,q,a).stripped()
 							
 					except Exception as ex:
 						# print(traceback.format_exception(None, # <- type(e) by docs, but ignored

@@ -82,7 +82,7 @@ def add_noise(base, noise=0.05):
 
 class GraphGenerator(object):
 
-	def __init__(self, small=False):
+	def __init__(self, small=False, int_names=False):
 
 		self.stats = {
 			"lines": 22,
@@ -94,6 +94,8 @@ class GraphGenerator(object):
 		if small:
 			self.stats["lines"] = 2
 			self.stats["stations_per_line"] = 3
+
+		self.int_names = int_names
 
 
 	def gen_a(self, Clz, prop_dict):
@@ -117,6 +119,10 @@ class GraphGenerator(object):
 	def gen_station_unique(self):
 		while True:
 			s = self.gen_station()
+			
+			if self.int_names:
+				s.p["name"] = str(len(self.station_set))
+
 			if s not in self.station_set:
 				self.station_set.add(s)
 				return s
@@ -127,7 +133,13 @@ class GraphGenerator(object):
 		n = gen_n(self.stats["lines"])
 
 		while len(self.line_set) < n:
-			self.line_set.add(self.gen_line())
+
+			line = self.gen_line()
+
+			if self.int_names:
+				line.p["name"] = str(len(self.line_set))
+
+			self.line_set.add(line)
 
 
 	def gen_stations(self):
