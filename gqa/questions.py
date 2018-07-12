@@ -17,11 +17,17 @@ from gql import GqlBuilder
 
 
 class QuestionForm(object):
-	def __init__(self, placeholders, english, functional, tpe, arguments_valid=lambda *args:True, answer_valid=lambda *args:True):
+	def __init__(self, placeholders, english, functional, type_string, 
+		type_id=None, 
+		arguments_valid=(lambda *args:True), 
+		answer_valid=(lambda *args:True) 
+	):
+
 		self.placeholders = placeholders
 		self.english = english
 		self.functional = functional
-		self.tpe = tpe
+		self.type_id = type_id
+		self.type_string = type_string
 		self.arguments_valid = arguments_valid
 		self.answer_valid = answer_valid
 
@@ -57,7 +63,7 @@ class QuestionForm(object):
 			cypher = None
 
 		if self.arguments_valid(graph, *raw_args) and self.answer_valid(graph, answer):
-			return QuestionSpec(english, functional, cypher, self.tpe), answer
+			return QuestionSpec(english, functional, cypher, self.type_id, self.type_string), answer
 
 	
 
@@ -72,37 +78,37 @@ question_forms = [
 		[Station], 
 		"How clean is {}?", 
 		(lambda s: Pick(s, "cleanliness")),
-		"StationCleanliness"),
+		"StationPropertyCleanliness"),
 
 	QuestionForm(
 		[Station], 
 		"How big is {}?", 
 		(lambda s: Pick(s, "size")),
-		"StationSize"),
+		"StationPropertySize"),
 
 	QuestionForm(
 		[Station], 
 		"What music plays at {}?", 
 		(lambda s: Pick(s, "music")),
-		"StationMusic"),
+		"StationPropertyMusic"),
 
 	QuestionForm(
 		[Station], 
 		"What architectural style is {}?", 
 		(lambda s: Pick(s, "architecture")),
-		"StationArchitecture"),
+		"StationPropertyArchitecture"),
 
 	QuestionForm(
 		[Station], 
 		"Does {} have disabled access?", 
 		(lambda s: Pick(s, "disabled_access")),
-		"StationDisabledAccess"),
+		"StationPropertyDisabledAccess"),
 
 	QuestionForm(
 		[Station], 
 		"Does {} have rail connections?", 
 		(lambda s: Pick(s, "has_rail")),
-		"StationHasRail"),
+		"StationPropertyHasRail"),
 
 	# --------------------------------------------------------------------------
 	
@@ -284,6 +290,9 @@ question_forms = [
 
 	# How to get from X to Y avoiding Z
 ]
+
+for idx, form in enumerate(question_forms):
+	form.type_id = idx
 
 
 

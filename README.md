@@ -101,7 +101,8 @@ question:
         - Station:
           - { name: Paddington, ... }
     - 2
-  tpe: StationShortestCount
+  type_string: StationShortestCount
+  type_id: 1
   cypher: MATCH (var1) MATCH (var2) MATCH tmp1 = shortestPath((var1)-[*]-(var2))  WHERE
     var1.id="c2b8c082-7c5b-4f70-9b7e-2c45872a6de8" AND var2.id="40761fab-abd2-4acf-93ae-e8bd06f1e524"  WITH
     nodes(tmp1)  AS var3 RETURN length(var3)  - 2

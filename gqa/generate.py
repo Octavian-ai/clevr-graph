@@ -26,7 +26,7 @@ if __name__ == "__main__":
 	parser.add_argument('--quick', action='store_true', help="Generate small graphs (faster)")
 	parser.add_argument('--omit-graph', action='store_true', help="Don't export the graph")
 	parser.add_argument('--int-names', action='store_true', help="Use integers as names")
-	parser.add_argument('--only-type', type=str, default=None, help="Only generate questions of type")
+	parser.add_argument('--only-type', type=str, default=None, help="Only generate questions of type prefix")
 
 
 	FLAGS = parser.parse_args()
@@ -69,14 +69,14 @@ if __name__ == "__main__":
 						
 							form = next(form_gen)
 
-							if FLAGS.only_type is None or FLAGS.only_type == form.tpe:
+							if FLAGS.only_type is None or FLAGS.only_type == form.type_string[:len(FLAGS.only_type)]:
 
-								f_try[form.tpe] += 1
+								f_try[form.type_string] += 1
 								
 								logger.debug(f"Generating question '{form.english}'")
 								q, a = form.generate(g)
 
-								f_success[form.tpe] += 1
+								f_success[form.type_string] += 1
 								i += 1
 								j += 1
 								pbar.update(1)
@@ -97,6 +97,8 @@ if __name__ == "__main__":
 						
 
 		yaml.dump_all(specs(), file, explicit_start=True)
+
+		logger.info(f"GQA per question type: {f_success}")
 
 		for i in f_try:
 			if i in f_success: 
