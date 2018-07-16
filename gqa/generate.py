@@ -6,37 +6,27 @@ import random
 import uuid
 import sys
 import traceback
-import argparse
 from tqdm import tqdm
 from collections import Counter
 
 from .questions import question_forms
 from .generate_graph import GraphGenerator
 from .types import *
+from .args import *
 
 import logging
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
 
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--count', type=int, default=10000, help="Number of (G,Q,A) to generate")
-	parser.add_argument('--log-level', type=str, default='INFO')
-	parser.add_argument('--questions-per-graph', type=int, default=1, help="Number of (Q,A) per G")
-	parser.add_argument('--quick', action='store_true', help="Generate small graphs (faster)")
-	parser.add_argument('--omit-graph', action='store_true', help="Don't export the graph")
-	parser.add_argument('--int-names', action='store_true', help="Use integers as names")
-	parser.add_argument('--only-type', type=str, default=None, help="Only generate questions of type prefix")
-
-
-	FLAGS = parser.parse_args()
+	args = get_args()
 
 	logging.basicConfig()
-	logger.setLevel(FLAGS.log_level)
-	logging.getLogger('gqa').setLevel(FLAGS.log_level)
+	logger.setLevel(args.log_level)
+	logging.getLogger('gqa').setLevel(args.log_level)
 
 	filename = f"./data/gqa-{uuid.uuid4()}.yaml"
-	logger.info(f"Generating {FLAGS.count} (G,Q,A) tuples into {filename}")
+	logger.info(f"Generating {args.count} (G,Q,A) tuples into {filename}")
 
 	os.makedirs("./data", exist_ok=True)
 
@@ -53,23 +43,23 @@ if __name__ == "__main__":
 		def specs():
 			form_gen = forms()
 			i = 0
-			with tqdm(total=FLAGS.count) as pbar:
-				while i < FLAGS.count:
+			with tqdm(total=args.count) as pbar:
+				while i < args.count:
 
 					try:
 						logger.debug("Generating graph")
-						g = GraphGenerator(small=FLAGS.quick,int_names=FLAGS.int_names).generate().graph_spec
+						g = GraphGenerator(args).generate().graph_spec
 
 						if len(g.nodes) == 0 or len(g.edges) == 0:
 							raise ValueError("Empty graph was generated")
 
 
 						j = 0
-						while j < FLAGS.questions_per_graph:
+						while j < args.questions_per_graph:
 						
 							form = next(form_gen)
 
-							if FLAGS.only_type is None or FLAGS.only_type == form.type_string[:len(FLAGS.only_type)]:
+							if args.type_string_prefix is None or form.type_string.startswith(args.type_string_prefix):
 
 								f_try[form.type_string] += 1
 								
@@ -83,17 +73,13 @@ if __name__ == "__main__":
 
 								logger.debug(f"Question: '{q}', answer: '{a}'")
 
-								if FLAGS.omit_graph:
+								if args.omit_graph:
 									yield DocumentSpec(None,q,a).stripped()
 								else:
 									yield DocumentSpec(g,q,a).stripped()
 							
 					except Exception as ex:
-						# print(traceback.format_exception(None, # <- type(e) by docs, but ignored
-						# 	ex, ex.__traceback__),
-						# 	file=sys.stderr, flush=True)
 						logger.debug(f"Exception {ex} whilst trying to generate GQA")
-						# Continue to next attempt
 						
 
 		yaml.dump_all(specs(), file, explicit_start=True)

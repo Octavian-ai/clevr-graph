@@ -14,6 +14,7 @@ from tqdm import tqdm
 logger = logging.getLogger(__name__)
 
 from .types import GraphSpec, NodeSpec, EdgeSpec, LineSpec
+from .args import *
 
 LineProperties = {
 	"has_aircon": [True, False],
@@ -82,7 +83,9 @@ def add_noise(base, noise=0.05):
 
 class GraphGenerator(object):
 
-	def __init__(self, small=False, int_names=False):
+	def __init__(self, args):
+
+		self.args = args
 
 		self.stats = {
 			"lines": 22,
@@ -91,11 +94,17 @@ class GraphGenerator(object):
 			"min_station_dist": 0.8,
 		}
 
-		if small:
+		if args.tiny:
 			self.stats["lines"] = 2
 			self.stats["stations_per_line"] = 3
+			self.stats["map_radius"] = 3
+			# self.stats["min_station_dist"] = 1
 
-		self.int_names = int_names
+		elif args.small:
+			self.stats["lines"] = 5
+			self.stats["stations_per_line"] = 5
+			self.stats["map_radius"] = 5
+			# self.stats["min_station_dist"] = 2
 
 
 	def gen_a(self, Clz, prop_dict):
@@ -120,7 +129,7 @@ class GraphGenerator(object):
 		while True:
 			s = self.gen_station()
 			
-			if self.int_names:
+			if self.args.int_names:
 				s.p["name"] = str(len(self.station_set))
 
 			if s not in self.station_set:
@@ -136,7 +145,7 @@ class GraphGenerator(object):
 
 			line = self.gen_line()
 
-			if self.int_names:
+			if self.args.int_names:
 				line.p["name"] = str(len(self.line_set))
 
 			self.line_set.add(line)
@@ -298,7 +307,7 @@ class GraphGenerator(object):
 
 			inter_xs = [i.p["x"] for i in stations if lines_per_station[i] > 1]
 			inter_ys = [i.p["y"] for i in stations if lines_per_station[i] > 1]
-			ax.plot(inter_xs, inter_ys, color='grey', marker='.', ls='', markersize=16)
+			ax.plot(inter_xs, inter_ys, color='grey', marker='s', ls='', markersize=10)
 
 			for i in stations:
 				ax.annotate(i.p["name"], i.pt)
@@ -311,6 +320,8 @@ class GraphGenerator(object):
 
 if __name__ == "__main__":
 
+	args = get_args()
+
 	logger.setLevel('DEBUG')
 	logging.basicConfig()
 
@@ -318,7 +329,7 @@ if __name__ == "__main__":
 	matplotlib.use("Agg") # Work in terminal
 	from matplotlib import pyplot as plt
 
-	g = GraphGenerator()
+	g = GraphGenerator(args)
 	g.generate()
 	g.draw()
 	
