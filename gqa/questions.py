@@ -222,6 +222,12 @@ question_forms = [
 		answer_valid=lambda g, a: a >= 0),
 
 	QuestionForm(
+		[Station, Station], 
+		"Are {} and {} adjacent?", 
+		(lambda a,b: Equal(Count(ShortestPath(a, b)),2)),
+		"StationAdjacent"),
+
+	QuestionForm(
 		[Station], 
 		"Which lines is {} on?", 
 		(lambda a: GetLines(a)),
