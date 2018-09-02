@@ -30,6 +30,18 @@ if __name__ == "__main__":
 
 	os.makedirs("./data", exist_ok=True)
 
+	def type_matches(tpe):
+		
+		if args.type_string_prefix is None:
+			return True
+
+		for i in args.type_string_prefix:
+			if tpe.startswith(i):
+				return True
+
+		return False
+
+
 	with open(filename, "w") as file:
 
 		f_try = Counter()
@@ -59,7 +71,7 @@ if __name__ == "__main__":
 						
 							form = next(form_gen)
 
-							if args.type_string_prefix is None or form.type_string.startswith(args.type_string_prefix):
+							if type_matches(form.type_string):
 
 								f_try[form.type_string] += 1
 								
