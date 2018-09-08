@@ -75,6 +75,15 @@ class Station(FunctionalOperator):
 	def get(self, graph):
 		return Station(random.choice(list(graph.nodes.values())))
 
+class FakeStationName(FunctionalOperator):
+	@classmethod
+	def get(self, graph):
+		# This needs generalised later
+		actual_station_names = {str(j.name()) for j in graph.nodes.values()}
+		max_stn = len(graph.nodes) * 2
+		nonexistent_stations = [i for i in range(max_stn) if str(i) not in actual_station_names]
+		return FakeStationName(random.choice(nonexistent_stations))
+
 class StationPropertyName(FunctionalOperator):
 	@classmethod
 	def get(self, graph):
@@ -120,6 +129,9 @@ class Boolean(FunctionalOperator):
 # General operations
 # --------------------------------------------------------------------------
 
+class Const(FunctionalOperator):
+	def op(self, graph, a):
+		return a
 
 class Lambda(FunctionalOperator):
 	def op(self, graph, a):
@@ -140,6 +152,8 @@ class Pick(FunctionalOperator):
 class Equal(FunctionalOperator):
 	def op(self, graph, a, b):
 		return a == b
+
+
 
 # --------------------------------------------------------------------------
 # Graph operations
@@ -177,8 +191,11 @@ def ids_to_nodes(graph, ids):
 	return [graph.nodes[i] for i in ids]
 
 class ShortestPath(FunctionalOperator):
-	def op(self, graph, a:NodeSpec, b:NodeSpec):
-		return ids_to_nodes(graph, nx.shortest_path(graph.gnx, a["id"], b["id"]))
+	def op(self, graph, a:NodeSpec, b:NodeSpec, fallback):
+		try:
+			return ids_to_nodes(graph, nx.shortest_path(graph.gnx, a["id"], b["id"]))
+		except nx.exception.NetworkXNoPath:
+			return fallback
 
 class Paths(FunctionalOperator):
 	def op(self, graph, a:NodeSpec, b:NodeSpec):

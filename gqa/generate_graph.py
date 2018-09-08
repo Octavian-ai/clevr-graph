@@ -125,16 +125,23 @@ class GraphGenerator(object):
 		s.p["name"] = name.title()
 		return s
 
+	@property
+	def station_set(self):
+		line_stations_set = set()
+		for line, stations in self.line_stations.items():
+			line_stations_set.update(stations)
+		return line_stations_set
+	
+
 	def gen_station_unique(self):
-		while True:
+		for i in range(50):
 			s = self.gen_station()
 			
-			if self.args.int_names:
-				s.p["name"] = str(len(self.station_set))
-
-			if s not in self.station_set:
-				self.station_set.add(s)
+			if s not in self.station_gen_set:
+				self.station_gen_set.add(s)
 				return s
+
+		raise Exception("Failed to generate unique station")
 
 	def gen_lines(self):
 		self.line_set = set()
@@ -142,18 +149,13 @@ class GraphGenerator(object):
 		n = gen_n(self.stats["lines"])
 
 		while len(self.line_set) < n:
-
 			line = self.gen_line()
-
-			if self.args.int_names:
-				line.p["name"] = str(len(self.line_set))
-
 			self.line_set.add(line)
 
 
 	def gen_stations(self):
 
-		self.station_set = set()
+		self.station_gen_set = set()
 		self.line_stations = {}
 		
 		for line in self.line_set:
@@ -188,7 +190,7 @@ class GraphGenerator(object):
 				stations.append(s)
 
 			self.line_stations[line] = stations
-		
+
 		# Helpers for coalesce operation
 		def find_nearby_stations():
 
@@ -225,8 +227,7 @@ class GraphGenerator(object):
 				line: remove_dupes([repif(i, target, replacement) for i in stations])
 				for line, stations in self.line_stations.items()
 			}
-			self.station_set -= set([target])
-
+			
 		# Coalesce nearby stations on lines
 		# Coalesce stations between lines
 		logger.debug("Coalesce stations")
@@ -241,8 +242,15 @@ class GraphGenerator(object):
 				for b in rest:
 					replace_station(b, a)
 
-			
 
+	def gen_int_names(self):
+		for sett in [self.line_set, self.station_set]:
+			int_names = list(range(len(sett) * 2)) # allocate more names than stations so we can test for existence
+			random.shuffle(int_names)
+			for i, item in enumerate(sett):
+				item.p["name"] = str(int_names[i])
+		
+		
 
 	def gen_graph_spec(self):
 		
@@ -273,13 +281,26 @@ class GraphGenerator(object):
 			nodes, edges, lines
 		)
 
+	def assert_data_valid(self):
+		if self.args.int_names:
+			for stations in self.line_stations.values():
+				for s in stations:
+					int(s.p["name"])
+
 
 	def generate(self):
 
 		self.gen_lines()
 		logger.debug("Generated lines")
 		self.gen_stations()
+
+		if self.args.int_names:
+			self.gen_int_names()
+			logger.debug("Generated int names")
+
 		self.gen_graph_spec()
+
+		self.assert_data_valid()
 
 		# For chaining
 		return self

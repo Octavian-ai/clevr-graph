@@ -224,8 +224,20 @@ question_forms = [
 	QuestionForm(
 		[Station, Station], 
 		"Are {} and {} adjacent?", 
-		(lambda a,b: Equal(Count(ShortestPath(a, b)),2)),
+		(lambda a,b: Equal(Count(ShortestPath(a, b, [])),2)),
 		"StationAdjacent"),
+
+	QuestionForm(
+		[Station], 
+		"Is there a station called {}?", 
+		(lambda a: Const(True)),
+		"StationExistence1"),
+
+	QuestionForm(
+		[FakeStationName], 
+		"Is there a station called {}?", 
+		(lambda a: Const(False)),
+		"StationExistence2"),
 
 	QuestionForm(
 		[Station], 

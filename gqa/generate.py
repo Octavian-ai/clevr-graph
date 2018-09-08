@@ -55,12 +55,13 @@ if __name__ == "__main__":
 		def specs():
 			form_gen = forms()
 			i = 0
+			fail = 0
 			with tqdm(total=args.count) as pbar:
 				while i < args.count:
 
 					try:
-						logger.debug("Generating graph")
 						g = GraphGenerator(args).generate().graph_spec
+						logger.debug("Generated graph")
 
 						if len(g.nodes) == 0 or len(g.edges) == 0:
 							raise ValueError("Empty graph was generated")
@@ -68,7 +69,6 @@ if __name__ == "__main__":
 
 						j = 0
 						while j < args.questions_per_graph:
-						
 							form = next(form_gen)
 
 							if type_matches(form.type_string):
@@ -92,6 +92,9 @@ if __name__ == "__main__":
 							
 					except Exception as ex:
 						logger.debug(f"Exception {ex} whilst trying to generate GQA")
+						fail += 1
+						if fail >= args.count / 3:
+							raise Exception(f"Too many exceptions whilst trying to generate GQA e.g. {ex}")
 						
 
 		yaml.dump_all(specs(), file, explicit_start=True)
