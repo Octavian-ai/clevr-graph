@@ -25,7 +25,12 @@ if __name__ == "__main__":
 	logger.setLevel(args.log_level)
 	logging.getLogger('gqa').setLevel(args.log_level)
 
-	filename = f"./data/gqa-{uuid.uuid4()}.yaml"
+	if args.name is not None:
+		name = args.name
+	else:
+		name = uuid.uuid4()
+
+	filename = f"./data/gqa-{name}.yaml"
 	logger.info(f"Generating {args.count} (G,Q,A) tuples into {filename}")
 
 	os.makedirs("./data", exist_ok=True)
@@ -92,10 +97,13 @@ if __name__ == "__main__":
 							
 					except Exception as ex:
 						logger.debug(f"Exception {ex} whilst trying to generate GQA")
-						fail += 1
-						if fail >= args.count / 3:
-							raise Exception(f"Too many exceptions whilst trying to generate GQA e.g. {ex}")
-						
+
+						# ValueError is deemed to mean "should not generate" and not a bug in the underlying code
+						if not isinstance(ex, ValueError):
+							fail += 1
+							if fail >= args.count / 3:
+								raise Exception(f"Too many exceptions whilst trying to generate GQA e.g. {ex}")
+							
 
 		yaml.dump_all(specs(), file, explicit_start=True)
 

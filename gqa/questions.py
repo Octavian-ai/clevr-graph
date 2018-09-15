@@ -228,6 +228,18 @@ question_forms = [
 		"StationAdjacent"),
 
 	QuestionForm(
+		[Architecture, Station], 
+		"Which {} station is adjacent to {}?", 
+		lambda a,b: UnpackUnitList(Pluck(Filter(Neighbors(b), "architecture", a), "name")),
+		"StationArchitectureAdjacent"),
+
+	QuestionForm(
+		[Station, Station], 
+		"Are {} and {} connected by the same station?", 
+		(lambda a,b: Equal(Count(ShortestPath(a, b, [])),2)),
+		"StationOneApart"),
+
+	QuestionForm(
 		[Station], 
 		"Is there a station called {}?", 
 		(lambda a: Const(True)),

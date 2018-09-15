@@ -37,7 +37,14 @@ class FunctionalOperator(object):
 			raise ex
 
 	def op(self, *args):
-		"""Perform this individual operation"""
+		"""
+		Perform this individual operation
+
+		Operations should raise ValueError if it is not possible to generate
+		a valid answer, but no error has occured. This exception will be silently
+		swallowed.
+
+		"""
 		raise NotImplementedError()
 
 	def stripped(self):
@@ -210,6 +217,10 @@ class FilterAdjacent(FunctionalOperator):
 				if j["id"] in ns:
 					r.append([i,j])
 		return r
+
+class Neighbors(FunctionalOperator):
+	def op(self, graph, station:NodeSpec):
+		return ids_to_nodes(graph, graph.gnx.neighbors(station["id"]))
 
 class FilterHasPathTo(FunctionalOperator):
 	def op(self, graph, a:List, b:NodeSpec):
