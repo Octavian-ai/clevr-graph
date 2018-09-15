@@ -3,7 +3,7 @@ import argparse
 
 def get_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--count', type=int, default=10000, help="Number of (G,Q,A) to generate")
+	parser.add_argument('--count', type=int, default=10000, help="Number of (G,Q,A) to generate in thousands")
 	parser.add_argument('--log-level', type=str, default='INFO')
 	parser.add_argument('--questions-per-graph', type=int, default=1, help="Number of (Q,A) per G")
 	parser.add_argument('--omit-graph', action='store_true', help="Don't export the graph")

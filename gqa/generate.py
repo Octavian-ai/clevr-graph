@@ -30,8 +30,10 @@ if __name__ == "__main__":
 	else:
 		name = uuid.uuid4()
 
+	total_gqa = args.count * 1000
+
 	filename = f"./data/gqa-{name}.yaml"
-	logger.info(f"Generating {args.count} (G,Q,A) tuples into {filename}")
+	logger.info(f"Generating {total_gqa} (G,Q,A) tuples into {filename}")
 
 	os.makedirs("./data", exist_ok=True)
 
@@ -61,8 +63,8 @@ if __name__ == "__main__":
 			form_gen = forms()
 			i = 0
 			fail = 0
-			with tqdm(total=args.count) as pbar:
-				while i < args.count:
+			with tqdm(total=total_gqa) as pbar:
+				while i < total_gqa:
 
 					try:
 						g = GraphGenerator(args).generate().graph_spec
@@ -101,7 +103,7 @@ if __name__ == "__main__":
 						# ValueError is deemed to mean "should not generate" and not a bug in the underlying code
 						if not isinstance(ex, ValueError):
 							fail += 1
-							if fail >= args.count / 3:
+							if fail >= total_gqa / 3:
 								raise Exception(f"Too many exceptions whilst trying to generate GQA e.g. {ex}")
 							
 
