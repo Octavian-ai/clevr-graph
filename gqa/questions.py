@@ -82,9 +82,21 @@ question_forms = [
 
 	QuestionForm(
 		[Station], 
+		"What is the cleanliness level of {} station?", 
+		(lambda s: Pick(s, "cleanliness")),
+		"StationPropertyCleanliness2"),
+
+	QuestionForm(
+		[Station], 
 		"How big is {}?", 
 		(lambda s: Pick(s, "size")),
 		"StationPropertySize"),
+
+	QuestionForm(
+		[Station], 
+		"What size is {}?", 
+		(lambda s: Pick(s, "size")),
+		"StationPropertySize2"),
 
 	QuestionForm(
 		[Station], 
@@ -94,9 +106,22 @@ question_forms = [
 
 	QuestionForm(
 		[Station], 
+		"At {} what sort of music plays?", 
+		(lambda s: Pick(s, "music")),
+		"StationPropertyMusic2"),
+
+
+	QuestionForm(
+		[Station], 
 		"What architectural style is {}?", 
 		(lambda s: Pick(s, "architecture")),
 		"StationPropertyArchitecture"),
+
+	QuestionForm(
+		[Station], 
+		"Describe {} station's architectural style.", 
+		(lambda s: Pick(s, "architecture")),
+		"StationPropertyArchitecture2"),
 
 	QuestionForm(
 		[Station], 
@@ -106,9 +131,22 @@ question_forms = [
 
 	QuestionForm(
 		[Station], 
+		"Is there disabled access at {}?", 
+		(lambda s: Pick(s, "disabled_access")),
+		"StationPropertyDisabledAccess2"),
+
+	QuestionForm(
+		[Station], 
 		"Does {} have rail connections?", 
 		(lambda s: Pick(s, "has_rail")),
 		"StationPropertyHasRail"),
+
+	
+	QuestionForm(
+		[Station], 
+		"Can you get rail connections at {}?", 
+		(lambda s: Pick(s, "has_rail")),
+		"StationPropertyHasRail2"),
 
 	# --------------------------------------------------------------------------
 	
