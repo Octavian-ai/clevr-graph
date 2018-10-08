@@ -83,7 +83,7 @@ if __name__ == "__main__":
 								f_try[form.type_string] += 1
 								
 								logger.debug(f"Generating question '{form.english}'")
-								q, a = form.generate(g)
+								q, a = form.generate(g, args)
 
 								f_success[form.type_string] += 1
 								i += 1

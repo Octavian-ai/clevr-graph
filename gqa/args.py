@@ -13,4 +13,5 @@ def get_args():
 
 	parser.add_argument('--tiny',  action='store_true', help="Generate really small graphs (faster)")
 	parser.add_argument('--small', action='store_true', help="Generate small graphs (faster)")
+	parser.add_argument('--disable-cypher', action='store_false', dest='generate_cypher')
 	return parser.parse_args()

@@ -39,7 +39,7 @@ class QuestionForm(object):
 			*[f"{{{i.__name__}}}" for i in self.placeholders]
 		)
 
-	def generate(self, graph):		
+	def generate(self, graph, runtime_args):		
 		args = [i.get(graph) for i in self.placeholders]
 		raw_args = [i.args[0] for i in args]
 
@@ -55,15 +55,21 @@ class QuestionForm(object):
 		answer = self.functional(*raw_args)(graph)
 		functional = self.functional(*args).stripped()
 
-		try:
-			cypher = GqlBuilder(functional).build()
-		except Exception as ex:
-			logger.debug(f"Failed to generate cypher: {ex}")
-			# traceback.print_exc()
+		if runtime_args.generate_cypher:
+			try:
+				cypher = GqlBuilder(functional).build()
+			except Exception as ex:
+				logger.debug(f"Failed to generate cypher: {ex}")
+				# traceback.print_exc()
+				cypher = None
+		else:
 			cypher = None
 
 		if self.arguments_valid(graph, *raw_args) and self.answer_valid(graph, answer):
 			return QuestionSpec(english, functional, cypher, self.type_id, self.type_string), answer
+
+		else:
+			raise ValueError("Arguments or answer invalid")
 
 	
 
