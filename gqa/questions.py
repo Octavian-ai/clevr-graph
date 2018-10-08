@@ -254,7 +254,7 @@ question_forms = [
 	QuestionForm(
 		[Station, Station], 
 		"How many stations are between {} and {}?", 
-		(lambda a,b: Subtract(Count(ShortestPath(a, b)),2)),
+		(lambda a,b: Subtract(Count(ShortestPath(a, b, [])),2)),
 		"StationShortestCount",
 		arguments_valid=lambda g, a, b: a != b,
 		answer_valid=lambda g, a: a >= 0),
