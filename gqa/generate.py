@@ -39,10 +39,10 @@ if __name__ == "__main__":
 
 	def type_matches(tpe):
 		
-		if args.type_string_prefix is None:
+		if args.type_prefix is None:
 			return True
 
-		for i in args.type_string_prefix:
+		for i in args.type_prefix:
 			if tpe.startswith(i):
 				return True
 

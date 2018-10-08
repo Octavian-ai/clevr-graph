@@ -274,7 +274,7 @@ question_forms = [
 	QuestionForm(
 		[Station, Station], 
 		"Are {} and {} connected by the same station?", 
-		(lambda a,b: Equal(Count(ShortestPath(a, b, [])),2)),
+		(lambda a,b: Equal(Count(ShortestPath(a, b, [])),3)),
 		"StationOneApart"),
 
 	QuestionForm(

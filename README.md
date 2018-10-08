@@ -124,7 +124,7 @@ You can randomly generate your own unique CLEVR graph dataset:
 ```shell
 pipenv install
 pipenv shell
-python -m gqa.generate --count 200
+python -m gqa.generate --count 10
 ```
 
 ## English, Functional and Cypher questions
