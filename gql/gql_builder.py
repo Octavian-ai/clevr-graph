@@ -221,7 +221,7 @@ class GqlBuilder(object):
         subquery = f"{a}.{unquote(prop)}"
         return self.do_match_to_with_transition(subquery) if self.current_state < WITH else subquery
 
-    def shortest_path(self, a: Var, b: Var):
+    def shortest_path(self, a: Var, b: Var, fallback):
         if self.current_state > MATCH:
             raise NotImplementedError()
 
