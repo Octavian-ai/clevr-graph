@@ -275,12 +275,20 @@ class SlidingPairs(FunctionalOperator):
 def GetLines(a):
 	return Unique(Pluck(Edges(a), "line_name"))
 
+@macro
+def Adjacent(a, b):
+	return Equal(Count(ShortestPath(a, b, [])), 2)
+
 class HasIntersection(FunctionalOperator):
 	def op(self, graph, a, b):
 		for i in a:
 			if i in b:
 				return True
 		return False
+
+class Intersection(FunctionalOperator):
+	def op(self, graph, a, b):
+		return list(set(a) & set(b))
 
 class Filter(FunctionalOperator):
 	def op(self, graph, a:List, b, c):
@@ -293,6 +301,13 @@ class UnpackUnitList(FunctionalOperator):
 			return l[0]
 		else:
 			raise ValueError(f"List is length {len(l)}, expected 1")
+
+class Sample(FunctionalOperator):
+	def op(self, graph, l:List, n:int):
+		if len(l) < n:
+			raise ValueError(f"Cannot sample {n} items from list of length {len(l)}")
+		else:
+			return random.choices(l, k=n)
 
 class First(FunctionalOperator):
 	def op(self, graph, l:List):

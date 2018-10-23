@@ -269,7 +269,9 @@ class GraphGenerator(object):
 
 					a = {
 						"station1": i.p["id"],
+						"station1_name": i.p["name"],
 						"station2": stations[idx+1].p["id"],
+						"station2_name": stations[idx+1].p["name"],
 					}
 
 					b = line.to_attr_dict()

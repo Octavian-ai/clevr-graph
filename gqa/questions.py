@@ -65,7 +65,7 @@ class QuestionForm(object):
 		else:
 			cypher = None
 
-		if self.arguments_valid(graph, *raw_args) and self.answer_valid(graph, answer):
+		if self.arguments_valid(graph, *raw_args) and self.answer_valid(graph, answer, *raw_args):
 			return QuestionSpec(english, functional, cypher, self.type_id, self.type_string), answer
 
 		else:
@@ -263,13 +263,21 @@ question_forms = [
 		(lambda a,b: Subtract(Count(ShortestPath(a, b, [])),2)),
 		"StationShortestCount",
 		arguments_valid=lambda g, a, b: a != b,
-		answer_valid=lambda g, a: a >= 0),
+		answer_valid=lambda g, a, b, c: a >= 0),
 
 	QuestionForm(
 		[Station, Station], 
 		"Are {} and {} adjacent?", 
-		(lambda a,b: Equal(Count(ShortestPath(a, b, [])),2)),
+		(lambda a,b: Adjacent(a,b)),
 		"StationAdjacent"),
+
+	QuestionForm(
+		[Station, Station], 
+		"Which station is adjacent to {} and {}?", 
+		lambda a,b: UnpackUnitList(Pluck(Sample(Intersection(Neighbors(a), Neighbors(b)), 1), "name")),
+		"StationPairAdjacent",
+		arguments_valid=lambda g, a, b: a != b,
+		answer_valid=lambda g, a, b, c: a != b and a != c),
 
 	QuestionForm(
 		[Architecture, Station], 

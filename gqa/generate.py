@@ -75,8 +75,10 @@ if __name__ == "__main__":
 
 
 						j = 0
+						attempt = 0
 						while j < args.questions_per_graph:
 							form = next(form_gen)
+							attempt += 1
 
 							if type_matches(form.type_string):
 
@@ -96,6 +98,9 @@ if __name__ == "__main__":
 									yield DocumentSpec(None,q,a).stripped()
 								else:
 									yield DocumentSpec(g,q,a).stripped()
+
+							if attempt > total_gqa / 3:
+								raise Exception(f"Could not find form that matches {args.type_prefix}")
 							
 					except Exception as ex:
 						logger.debug(f"Exception {ex} whilst trying to generate GQA")
@@ -104,7 +109,7 @@ if __name__ == "__main__":
 						if not isinstance(ex, ValueError):
 							fail += 1
 							if fail >= total_gqa / 3:
-								raise Exception(f"Too many exceptions whilst trying to generate GQA e.g. {ex}")
+								raise Exception(f"{ex} --- Too many exceptions whilst trying to generate GQA, stopping.")
 							
 
 		yaml.dump_all(specs(), file, explicit_start=True)

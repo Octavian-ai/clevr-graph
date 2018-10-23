@@ -33,6 +33,13 @@ This dataset contains a set of graph, question, answer tuples where
  - Is there disabled access at {Station}?
  - Does {Station} have rail connections?
  - Can you get rail connections at {Station}?
+ - How many stations are between {Station} and {Station}?
+ - Are {Station} and {Station} adjacent?
+ - Which {Architecture} station is adjacent to {Station}?
+ - Are {Station} and {Station} connected by the same station?
+ - Is there a station called {Station}?
+ - Is there a station called {FakeStationName}?
+ - Which station is adjacent to {Station} and {Station}?
  - How many architectural styles does {Line} pass through?
  - How many music styles does {Line} pass through?
  - How many sizes of station does {Line} pass through?
@@ -41,17 +48,11 @@ This dataset contains a set of graph, question, answer tuples where
  - How many {Size} stations does {Line} pass through?
  - How many stations with disabled access does {Line} pass through?
  - How many stations with rail connections does {Line} pass through?
- - How many stations are between {Station} and {Station}?
- - Are {Station} and {Station} adjacent?
- - Which {Architecture} station is adjacent to {Station}?
- - Are {Station} and {Station} connected by the same station?
- - Is there a station called {Station}?
- - Is there a station called {FakeStationName}?
  - Which lines is {Station} on?
  - How many lines is {Station} on?
- - Are {Station} and {Station} on the same line?
  - Which stations does {Line} pass through?
  - Which line has the most {Architecture} stations?
+ - Are {Station} and {Station} on the same line?
  - What's the nearest station to {Station} with disabled access?
 
 Pull requests adding new questions are very welcome!
@@ -77,6 +78,9 @@ Multi-step reasoning:
 Here are some questions that might be interesting to add to the dataset:
 
 - What is the {biggest/cleanest} station {count} stops away from {Station}
+- Are {Station} and {Station} connected by the same line as {Station} is on?
+- What {Property} station is on {Line} and {Line}?
+- Can I get from {Station} to {Station} only via {Property} stations?
 
 ## Data format
 
