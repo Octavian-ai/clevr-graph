@@ -22,11 +22,17 @@ This dataset contains a set of graph, question, answer tuples where
 `python -m gqa.list_questions` lists the currently supported questions:
 
  - How clean is {Station}?
+ - What is the cleanliness level of {Station} station?
  - How big is {Station}?
+ - What size is {Station}?
  - What music plays at {Station}?
+ - At {Station} what sort of music plays?
  - What architectural style is {Station}?
+ - Describe {Station} station's architectural style.
  - Does {Station} have disabled access?
+ - Is there disabled access at {Station}?
  - Does {Station} have rail connections?
+ - Can you get rail connections at {Station}?
  - How many architectural styles does {Line} pass through?
  - How many music styles does {Line} pass through?
  - How many sizes of station does {Line} pass through?
@@ -36,6 +42,11 @@ This dataset contains a set of graph, question, answer tuples where
  - How many stations with disabled access does {Line} pass through?
  - How many stations with rail connections does {Line} pass through?
  - How many stations are between {Station} and {Station}?
+ - Are {Station} and {Station} adjacent?
+ - Which {Architecture} station is adjacent to {Station}?
+ - Are {Station} and {Station} connected by the same station?
+ - Is there a station called {Station}?
+ - Is there a station called {FakeStationName}?
  - Which lines is {Station} on?
  - How many lines is {Station} on?
  - Are {Station} and {Station} on the same line?
@@ -46,6 +57,26 @@ This dataset contains a set of graph, question, answer tuples where
 Pull requests adding new questions are very welcome!
 
 See a full list of the question definitions in [the source code](https://github.com/Octavian-ai/clevr-graph/blob/master/gqa/questions.py).
+
+### Types of skills involved in answering questions
+
+Fundamental skills:
+
+- Counting nodes
+- Counting edges
+- Recalling property of node
+
+Multi-step reasoning:
+
+- Combining facts arithmetically (additon, counting) and logically (and, or)
+- Traversing graph (repeated edge / node recall based on current memory)
+- Comparison of data
+
+### Potential new questions
+
+Here are some questions that might be interesting to add to the dataset:
+
+- What is the {biggest/cleanest} station {count} stops away from {Station}
 
 ## Data format
 
@@ -126,6 +157,8 @@ pipenv install
 pipenv shell
 python -m gqa.generate --count 10
 ```
+
+The code is single threaded. If you run multiple processes in parallel then `cat` their output together, you can use all your CPU cores :)
 
 ## English, Functional and Cypher questions
 
