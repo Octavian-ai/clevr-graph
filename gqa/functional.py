@@ -207,7 +207,7 @@ class ShortestPath(FunctionalOperator):
 class ShortestPathOnlyUsing(FunctionalOperator):
 	def op(self, graph, a:NodeSpec, b:NodeSpec, only_using_nodes:List[NodeSpec], fallback):
 		try:
-			induced_subgraph = nx.induced_subgraph(graph.gnx, only_using_nodes)
+			induced_subgraph = nx.induced_subgraph(graph.gnx, [i["id"] for i in only_using_nodes + [a,b]])
 			return ids_to_nodes(graph, nx.shortest_path(induced_subgraph, a["id"], b["id"]))
 		except nx.exception.NetworkXNoPath:
 			return fallback
@@ -394,6 +394,8 @@ class First(FunctionalOperator):
 
 class MinBy(FunctionalOperator):
 	def op(self, graph, a, b):
+		if len(a) == 0:
+			raise ValueError("Cannot perform MinBy on empty list")
 		return min(a, key=lambda i: b(i)(graph))
 
 

@@ -18,7 +18,7 @@ from .args import *
 
 LineProperties = {
 	"has_aircon": [True, False],
-	"color": ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan'],
+	"color": ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'olive', 'cyan'],
 	"stroke": ["solid" , "dashed", "dashdot", "dotted"],
 	"built": ["50s", "60s", "70s", "80s", "90s", "00s", "recent"],
 }
@@ -74,7 +74,8 @@ class GeneratedLine(GeneratedEntity):
 		}
 
 
-def gen_n(base, noise = 0.3):
+def gen_n(base, noise = 0.2):
+	return base
 	return round(random.gauss(base, noise*base))
 
 def add_noise(base, noise=0.05):
@@ -103,7 +104,7 @@ class GraphGenerator(object):
 		elif args.small:
 			self.stats["lines"] = 5
 			self.stats["stations_per_line"] = 5
-			self.stats["map_radius"] = 5
+			self.stats["map_radius"] = 4
 			# self.stats["min_station_dist"] = 2
 
 

@@ -40,16 +40,21 @@ if __name__ == "__main__":
 
 	os.makedirs("./data", exist_ok=True)
 
-	def type_matches(tpe):
-		
-		if args.type_prefix is None:
-			return True
+	def type_matches(form):
 
-		for i in args.type_prefix:
-			if tpe.startswith(i):
+		if args.group is not None:
+			if form.group == args.group:
 				return True
+			else:
+				return False
+		
+		if args.type_prefix is not None:
+			for i in args.type_prefix:
+				if form.type_string.startswith(i):
+					return True
+			return False
 
-		return False
+		return True
 
 
 	with open(filename, "w") as file:
@@ -85,7 +90,7 @@ if __name__ == "__main__":
 							form = next(form_gen)
 							attempt += 1
 
-							if type_matches(form.type_string):
+							if type_matches(form):
 
 								f_try[form.type_string] += 1
 								
@@ -107,7 +112,7 @@ if __name__ == "__main__":
 								else:
 									yield DocumentSpec(g,q,a).stripped()
 
-							if attempt > max(total_gqa / 3, 30):
+							if attempt > len(question_forms) * 3:
 								raise Exception(f"Could not find form that matches {args.type_prefix}")
 							
 					except Exception as ex:
@@ -116,7 +121,7 @@ if __name__ == "__main__":
 						# ValueError is deemed to mean "should not generate" and not a bug in the underlying code
 						if not isinstance(ex, ValueError):
 							fail += 1
-							if fail >= total_gqa / 3:
+							if fail >= max(total_gqa / 3, len(question_forms)):
 								raise Exception(f"{ex} --- Too many exceptions whilst trying to generate GQA, stopping.")
 							
 

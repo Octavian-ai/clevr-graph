@@ -20,7 +20,7 @@ class QuestionForm(object):
 	def __init__(self, placeholders, english:str, functional:FunctionalOperator, type_string:str, 
 		arguments_valid=(lambda *args:True), 
 		answer_valid=(lambda *args:True),
-		group_string:str=None,
+		group:str=None,
 		type_id:int=None, 
 	):
 
@@ -31,7 +31,7 @@ class QuestionForm(object):
 		self.type_string = type_string
 		self.arguments_valid = arguments_valid
 		self.answer_valid = answer_valid
-		self.group_string = group_string
+		self.group = group
 
 	def __repr__(self):
 		return self.english
@@ -68,7 +68,7 @@ class QuestionForm(object):
 			cypher = None
 
 		if self.arguments_valid(graph, *raw_args) and self.answer_valid(graph, answer, *raw_args):
-			return QuestionSpec(english, functional, cypher, self.type_id, self.type_string, self.group_string), answer
+			return QuestionSpec(english, functional, cypher, self.type_id, self.type_string, self.group), answer
 
 		else:
 			raise ValueError("Arguments or answer invalid")
@@ -243,7 +243,7 @@ question_forms = [
 
 	
 	# --------------------------------------------------------------------------
-	# Multi-step graph algorithms question set
+	# MultiStep graph algorithms question set
 	# --------------------------------------------------------------------------
 
 	QuestionForm(
@@ -253,17 +253,17 @@ question_forms = [
 		"StationShortestCount",
 		arguments_valid=lambda g, n1, n2: n1 != n2,
 		answer_valid=lambda g, a, n1, n2: a >= 0,
-		group_string="multi-step"),
+		group="MultiStep"),
 
 
 	QuestionForm(
 		[Station, Station, Cleanliness], 
-		"How many stations are between {} and {} avoiding {} stations?", 
+		"How many stations are on the shortest path between {} and {} avoiding {} stations?", 
 		(lambda n1, n2 ,c: CountNodesBetween(ShortestPathOnlyUsing(n1, n2, Without(AllNodes(), "cleanliness", c), []))),
 		"StationShortestAvoidingCount",
 		arguments_valid=lambda g, n1, n2, c: n1 != n2,
 		answer_valid=lambda g, a, n1, n2, c: a >= 0,
-		group_string="multi-step"),
+		group="MultiStep"),
 
 
 	# 'two hops away'
@@ -272,18 +272,18 @@ question_forms = [
 		"How many other stations are two stops or closer to {}?", 
 		(lambda a: Count(WithinHops(a, 2))),
 		"StationTwoHops",
-		group_string="multi-step"),
+		group="MultiStep"),
 
 
 	QuestionForm(
 		[Station, Architecture],
 		"What's the nearest station to {} with {} architecture?",
 		lambda x, a: Pick(MinBy(
-			FilterHasPathTo(Filter(AllNodes(), "architecture", True), a), 
-			lambda y: Count(ShortestPath(x, y))
+			FilterHasPathTo(Filter(AllNodes(), "architecture", a), x), 
+			lambda y: Count(ShortestPath(x, y, []))
 		), "name"),
 		"NearestStationArchitecture",
-		group_string="multi-step"),
+		group="MultiStep"),
 
 	QuestionForm(
 		[Station, Station],
@@ -291,7 +291,7 @@ question_forms = [
 		lambda n1, n2: Count(Paths(n1, n2)),
 		"DistinctRoutes",
 		arguments_valid=lambda g, n1, n2: n1 != n2,
-		group_string="multi-step"),
+		group="MultiStep"),
 
 
 	QuestionForm(
@@ -299,7 +299,7 @@ question_forms = [
 		"Is {} part of a cycle?",
 		lambda n1: HasCycle(n1),
 		"CountCycles",
-		group_string="multi-step"),
+		group="MultiStep"),
 
 	# --------------------------------------------------------------------------
 
