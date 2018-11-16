@@ -11,4 +11,4 @@ if __name__ == "__main__":
 	print("\nTypes:")
 
 	for i in question_forms:
-		print(i.type_string)
+		print(i.type_string, '-', i.group) 
