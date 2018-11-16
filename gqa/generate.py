@@ -1,6 +1,7 @@
 
 
 import os
+import os.path
 import yaml
 import random
 import uuid
@@ -31,6 +32,8 @@ if __name__ == "__main__":
 		name = uuid.uuid4()
 
 	total_gqa = args.count * 1000
+	if args.just_one:
+		total_gqa = 1
 
 	filename = f"./data/gqa-{name}.yaml"
 	logger.info(f"Generating {total_gqa} (G,Q,A) tuples into {filename}")
@@ -67,7 +70,9 @@ if __name__ == "__main__":
 				while i < total_gqa:
 
 					try:
-						g = GraphGenerator(args).generate().graph_spec
+						graph = GraphGenerator(args)
+						graph.generate()
+						g = graph.graph_spec
 						logger.debug("Generated graph")
 
 						if len(g.nodes) == 0 or len(g.edges) == 0:
@@ -94,12 +99,15 @@ if __name__ == "__main__":
 
 								logger.debug(f"Question: '{q}', answer: '{a}'")
 
+								if args.draw:
+									graph.draw(os.path.join("data", f"graph-{i}.png"))
+
 								if args.omit_graph:
 									yield DocumentSpec(None,q,a).stripped()
 								else:
 									yield DocumentSpec(g,q,a).stripped()
 
-							if attempt > total_gqa / 3:
+							if attempt > max(total_gqa / 3, 30):
 								raise Exception(f"Could not find form that matches {args.type_prefix}")
 							
 					except Exception as ex:

@@ -204,9 +204,58 @@ class ShortestPath(FunctionalOperator):
 		except nx.exception.NetworkXNoPath:
 			return fallback
 
+class ShortestPathOnlyUsing(FunctionalOperator):
+	def op(self, graph, a:NodeSpec, b:NodeSpec, only_using_nodes:List[NodeSpec], fallback):
+		try:
+			induced_subgraph = nx.induced_subgraph(graph.gnx, only_using_nodes)
+			return ids_to_nodes(graph, nx.shortest_path(induced_subgraph, a["id"], b["id"]))
+		except nx.exception.NetworkXNoPath:
+			return fallback
+
 class Paths(FunctionalOperator):
 	def op(self, graph, a:NodeSpec, b:NodeSpec):
 		return [ids_to_nodes(graph, i) for i in nx.all_simple_paths(graph.gnx, a["id"], b["id"])]
+
+
+class HasCycle(FunctionalOperator):
+	def op(self, graph, a:NodeSpec):
+
+		def canonical_edge(e):
+			return (frozenset(e[:2]), e[2]["attr_dict"]["line_id"])
+
+		def dfs_unidirected_cycle(head_id, path_nodes=frozenset(), path_edges=frozenset(), indent=""):
+			for e in graph.gnx.edges([head_id], data=True):
+				assert e[0] == head_id
+				assert head_id in path_nodes
+
+				from_id = head_id
+				to_id = e[1]
+
+				# Nothing new
+				if canonical_edge(e) in path_edges:
+					continue
+
+				# If we've returned home
+				if to_id == a["id"]:
+					return True
+
+				# Nothing new
+				if to_id in path_nodes:
+					continue
+			
+				ir = dfs_unidirected_cycle(
+					to_id, 
+					path_nodes | set([to_id]), 
+					path_edges | set([canonical_edge(e)]),
+					indent=indent+"  ",
+				)
+
+				if ir:
+					return True
+
+
+			return False
+		return dfs_unidirected_cycle(a["id"], frozenset([a["id"]]))
 
 class FilterAdjacent(FunctionalOperator): 
 	def op(self, graph, a:List, b:List):
@@ -221,6 +270,26 @@ class FilterAdjacent(FunctionalOperator):
 class Neighbors(FunctionalOperator):
 	def op(self, graph, station:NodeSpec):
 		return ids_to_nodes(graph, graph.gnx.neighbors(station["id"]))
+
+class WithinHops(FunctionalOperator):
+	def op(self, graph, station:NodeSpec, hops:int):
+		rs = set()
+		tips = set(station)
+		for i in range(hops):
+			next_tips = set()
+			for j in tips:
+				next_tips |= set(ids_to_nodes(graph, graph.gnx.neighbors(j)))
+
+			rs |= tips
+			tips = next_tips - rs
+
+		rs |= next_tips
+		rs.remove(station)
+		return list(rs)
+
+
+
+
 
 class FilterHasPathTo(FunctionalOperator):
 	def op(self, graph, a:List, b:NodeSpec):
@@ -279,6 +348,10 @@ def GetLines(a):
 def Adjacent(a, b):
 	return Equal(Count(ShortestPath(a, b, [])), 2)
 
+@macro
+def CountNodesBetween(a):
+	return Subtract(Count(a), 2)
+
 class HasIntersection(FunctionalOperator):
 	def op(self, graph, a, b):
 		for i in a:
@@ -293,6 +366,10 @@ class Intersection(FunctionalOperator):
 class Filter(FunctionalOperator):
 	def op(self, graph, a:List, b, c):
 		return [i for i in a if i[b] == c]
+
+class Without(FunctionalOperator):
+	def op(self, graph, a:List, b, c):
+		return [i for i in a if i[b] != c]
 
 class UnpackUnitList(FunctionalOperator):
 	"""This operator will raise if the given list is not length 1 - this is used as a guard against generating ambiguous questions"""

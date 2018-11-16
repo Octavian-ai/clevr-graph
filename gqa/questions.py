@@ -17,10 +17,11 @@ from gql import GqlBuilder
 
 
 class QuestionForm(object):
-	def __init__(self, placeholders, english, functional, type_string, 
-		type_id=None, 
+	def __init__(self, placeholders, english:str, functional:FunctionalOperator, type_string:str, 
 		arguments_valid=(lambda *args:True), 
-		answer_valid=(lambda *args:True) 
+		answer_valid=(lambda *args:True),
+		group_string:str=None,
+		type_id:int=None, 
 	):
 
 		self.placeholders = placeholders
@@ -30,6 +31,7 @@ class QuestionForm(object):
 		self.type_string = type_string
 		self.arguments_valid = arguments_valid
 		self.answer_valid = answer_valid
+		self.group_string = group_string
 
 	def __repr__(self):
 		return self.english
@@ -66,7 +68,7 @@ class QuestionForm(object):
 			cypher = None
 
 		if self.arguments_valid(graph, *raw_args) and self.answer_valid(graph, answer, *raw_args):
-			return QuestionSpec(english, functional, cypher, self.type_id, self.type_string), answer
+			return QuestionSpec(english, functional, cypher, self.type_id, self.type_string, self.group_string), answer
 
 		else:
 			raise ValueError("Arguments or answer invalid")
@@ -155,6 +157,8 @@ question_forms = [
 		"StationPropertyHasRail2"),
 
 	# --------------------------------------------------------------------------
+	# Line questions
+	# --------------------------------------------------------------------------
 	
 	QuestionForm(
 		[Line], 
@@ -176,8 +180,6 @@ question_forms = [
 		(lambda l: Count(Unique(Pluck(Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
 								  "size"))) ),
 		"LineTotalSizeCount"),
-
-	# --------------------------------------------------------------------------
 
 	QuestionForm(
 		[Music, Line], 
@@ -239,31 +241,67 @@ question_forms = [
 		),
 		"LineFilterHasRailCount"),
 
-	# --------------------------------------------------------------------------
-
-	# Other way of expressing the How many program
-	# QuestionForm(
-	# 	[Architecture, Line], 
-	# 	"How many {} stations are on the {} line?", 
-	# 	(lambda a, l: Count(
-	# 		Unique(Filter(
-	# 			Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
-	# 			"architecture",
-	# 			a))
-	# 	)),
-	# 	"LineArchitectureCount"),
-
-
 	
+	# --------------------------------------------------------------------------
+	# Multi-step graph algorithms question set
 	# --------------------------------------------------------------------------
 
 	QuestionForm(
 		[Station, Station], 
 		"How many stations are between {} and {}?", 
-		(lambda a,b: Subtract(Count(ShortestPath(a, b, [])),2)),
+		(lambda n1,n2: CountNodesBetween(ShortestPath(n1, n2, []))),
 		"StationShortestCount",
-		arguments_valid=lambda g, a, b: a != b,
-		answer_valid=lambda g, a, b, c: a >= 0),
+		arguments_valid=lambda g, n1, n2: n1 != n2,
+		answer_valid=lambda g, a, n1, n2: a >= 0,
+		group_string="multi-step"),
+
+
+	QuestionForm(
+		[Station, Station, Cleanliness], 
+		"How many stations are between {} and {} avoiding {} stations?", 
+		(lambda n1, n2 ,c: CountNodesBetween(ShortestPathOnlyUsing(n1, n2, Without(AllNodes(), "cleanliness", c), []))),
+		"StationShortestAvoidingCount",
+		arguments_valid=lambda g, n1, n2, c: n1 != n2,
+		answer_valid=lambda g, a, n1, n2, c: a >= 0,
+		group_string="multi-step"),
+
+
+	# 'two hops away'
+	QuestionForm(
+		[Station], 
+		"How many other stations are two stops or closer to {}?", 
+		(lambda a: Count(WithinHops(a, 2))),
+		"StationTwoHops",
+		group_string="multi-step"),
+
+
+	QuestionForm(
+		[Station, Architecture],
+		"What's the nearest station to {} with {} architecture?",
+		lambda x, a: Pick(MinBy(
+			FilterHasPathTo(Filter(AllNodes(), "architecture", True), a), 
+			lambda y: Count(ShortestPath(x, y))
+		), "name"),
+		"NearestStationArchitecture",
+		group_string="multi-step"),
+
+	QuestionForm(
+		[Station, Station],
+		"How many distinct routes are there between {} and {}?",
+		lambda n1, n2: Count(Paths(n1, n2)),
+		"DistinctRoutes",
+		arguments_valid=lambda g, n1, n2: n1 != n2,
+		group_string="multi-step"),
+
+
+	QuestionForm(
+		[Station],
+		"Is {} part of a cycle?",
+		lambda n1: HasCycle(n1),
+		"CountCycles",
+		group_string="multi-step"),
+
+	# --------------------------------------------------------------------------
 
 	QuestionForm(
 		[Station, Station], 
@@ -334,6 +372,8 @@ question_forms = [
 		(lambda a: Mode(Pluck(Edges(Filter(AllNodes(), "architecture", a)), "line_name")) ),
 		"LineMostArchitecture"),
 
+
+
 	# Too slow, needs better impl (e.g. construct meta-graph of interchanges)
 	# QuestionForm(
 	# 	[Station, Station],
@@ -344,15 +384,6 @@ question_forms = [
 	# 			lambda x: Count(Unique(SlidingPairs(GetLines(x))))
 	# 		), "name"),
 	# 	"LineMostArchitecture"),
-
-	QuestionForm(
-		[Station],
-		"What's the nearest station to {} with disabled access?",
-		lambda x: Pick(MinBy(
-			FilterHasPathTo(Filter(AllNodes(), "disabled_access", True), x), 
-			lambda y: Count(ShortestPath(x, y))
-		), "name"),
-		"NearestStationDisabledAccess"),
 
 	# Too often fails because it is ambiguous (multiple answers)
 	# QuestionForm(
@@ -368,9 +399,18 @@ question_forms = [
 	# 	"NearestByProperties"
 	# 	),
 
+	# Other way of expressing the How many program
+	# QuestionForm(
+	# 	[Architecture, Line], 
+	# 	"How many {} stations are on the {} line?", 
+	# 	(lambda a, l: Count(
+	# 		Unique(Filter(
+	# 			Nodes(Filter(AllEdges(), "line_id", Pick(l, "id"))),
+	# 			"architecture",
+	# 			a))
+	# 	)),
+	# 	"LineArchitectureCount"),
 
-
-	# How to get from X to Y avoiding Z
 ]
 
 for idx, form in enumerate(question_forms):

@@ -244,11 +244,12 @@ class GraphGenerator(object):
 
 
 	def gen_int_names(self):
-		for sett in [self.line_set, self.station_set]:
-			int_names = list(range(len(sett) * 2)) # allocate more names than stations so we can test for existence
+		for a_set in [self.line_set, self.station_set]:
+			int_names = list(range(len(a_set) * 2)) # allocate more names than stations so we can test for existence
 			random.shuffle(int_names)
-			for i, item in enumerate(sett):
+			for i, item in enumerate(a_set):
 				item.p["name"] = str(int_names[i])
+				item.p["id"] = item.p["name"]
 		
 		
 
@@ -312,6 +313,13 @@ class GraphGenerator(object):
 
 	def draw(self, filename="./graph.png"):
 
+		try:
+			import matplotlib
+			matplotlib.use("Agg") # Work in terminal
+			from matplotlib import pyplot as plt
+		except:
+			pass
+
 		fig, ax = plt.subplots(figsize=(30, 30))
 
 		lines_per_station = Counter()
@@ -348,10 +356,7 @@ if __name__ == "__main__":
 	logger.setLevel('DEBUG')
 	logging.basicConfig()
 
-	import matplotlib
-	matplotlib.use("Agg") # Work in terminal
-	from matplotlib import pyplot as plt
-
+	
 	g = GraphGenerator(args)
 	g.generate()
 	g.draw()

@@ -27,12 +27,15 @@ class Strippable(object):
 
 
 class QuestionSpec(Strippable):
-	def __init__(self, english, functional, cypher, type_id, type_string):
+	def __init__(self, english, functional, cypher, type_id, type_string, group_string):
 		self.english = english
 		self.functional = functional
-		self.type_string = type_string
-		self.type_id = type_id
 		self.cypher = cypher
+		self.type_id = type_id
+		self.type_string = type_string
+		self.group_string = group_string
+		
+		
 
 	def __repr__(self):
 		return self.english
@@ -43,7 +46,8 @@ class QuestionSpec(Strippable):
 			"functional": self.functional,
 			"type_string": self.type_string,
 			"type_id": self.type_id,
-			"cypher": self.cypher
+			"cypher": self.cypher,
+			"group_string": self.group_string,
 		}
 
 
