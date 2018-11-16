@@ -220,6 +220,8 @@ class Paths(FunctionalOperator):
 class HasCycle(FunctionalOperator):
 	def op(self, graph, a:NodeSpec):
 
+		# Would all_simple_paths also solve this for us?
+
 		def canonical_edge(e):
 			return (frozenset(e[:2]), e[2]["attr_dict"]["line_id"])
 
@@ -274,11 +276,11 @@ class Neighbors(FunctionalOperator):
 class WithinHops(FunctionalOperator):
 	def op(self, graph, station:NodeSpec, hops:int):
 		rs = set()
-		tips = set(station)
+		tips = set([station])
 		for i in range(hops):
 			next_tips = set()
 			for j in tips:
-				next_tips |= set(ids_to_nodes(graph, graph.gnx.neighbors(j)))
+				next_tips |= set(ids_to_nodes(graph, graph.gnx.neighbors(j["id"])))
 
 			rs |= tips
 			tips = next_tips - rs
