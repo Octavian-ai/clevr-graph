@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tenth=1
+tenth=100
 j=StationAdjacent
 
 for i in `seq 1 10`
