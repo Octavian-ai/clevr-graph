@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 data
+nohup.out
 
 .DS_Store
 *~

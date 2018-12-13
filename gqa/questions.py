@@ -298,7 +298,7 @@ question_forms = [
 		[Station],
 		"Is {} part of a cycle?",
 		lambda n1: HasCycle(n1),
-		"CountCycles",
+		"HasCycle",
 		group="MultiStep"),
 
 	# --------------------------------------------------------------------------
